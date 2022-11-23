@@ -143,17 +143,17 @@ def package_creation(project: dl.Project):
                                           output_type=dl.AnnotationType.CLASSIFICATION,
                                           )
     module = dl.PackageModule.from_entry_point(entry_point='resnet_adapter.py')
-    package = project.packages.push(package_name='resnet',
+    package = project.packages.push(package_name='resnet-no-train',
                                     src_path=os.getcwd(),
                                     # description='Global Dataloop ResNet implemented in pytorch',
                                     is_global=True,
                                     package_type='ml',
                                     codebase=dl.GitCodebase(git_url='https://github.com/dataloop-ai/pytorch_adapters',
-                                                            git_tag='mgmt3'),
+                                                            git_tag='master'),
                                     modules=[module],
                                     service_config={
                                         'runtime': dl.KubernetesRuntime(pod_type=dl.INSTANCE_CATALOG_GPU_K80_S,
-                                                                        runner_image='gcr.io/viewo-g/modelmgmt/resnet:0.0.7',
+                                                                        # runner_image='gcr.io/viewo-g/modelmgmt/resnet:0.0.7',
                                                                         autoscaler=dl.KubernetesRabbitmqAutoscaler(
                                                                             min_replicas=0,
                                                                             max_replicas=1),
@@ -164,10 +164,12 @@ def package_creation(project: dl.Project):
     #                                       'outputType': dl.AnnotationType.CLASSIFICATION,
     #                                       'tags': ['torch'], }}}
     # package = package.update()
-    s = package.services.list().items[0]
-    s.package_revision = package.version
-    s.versions['dtlpy'] = '1.63.2'
-    s.update(True)
+
+    # s = package.services.list().items[0]
+    # s.package_revision = package.version
+    # s.versions['dtlpy'] = '1.63.2'
+    # s.update(True)
+
     return package
 
 
@@ -199,10 +201,11 @@ def model_creation(package: dl.Package, resnet_ver='50'):
 
 
 if __name__ == "__main__":
-    env = 'prod'
-    project_name = 'DataloopModels'
-    dl.setenv(env)
-    project = dl.projects.get(project_name)
-    # package = project.packages.get('resnet')
+    dl.setenv('rc')
+    dl.login()
+    project = dl.projects.get(project_id='6842c551-f948-4451-8f78-c2955de3618f')
+    package = package_creation(project)
     # package.artifacts.list()
     # model_creation(package=package)
+
+    # artifact: https://storage.googleapis.com/model-mgmt-snapshots/ResNet50/model.pth
